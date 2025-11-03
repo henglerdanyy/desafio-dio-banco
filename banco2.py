@@ -17,6 +17,7 @@ def menu() -> str:
 [d] Depositar
 [s] Sacar
 [e] Extrato
+[t] Transferir
 [q] Sair
 => """
 
@@ -125,6 +126,30 @@ def exibir_extrato(conta: Dict) -> None:
     print(f"Saldo: R$ {conta['saldo']:.2f}")
     print("================")
 
+def transferir(conta_origem: Dict) -> None:
+    print("\n-- Transferência --")
+    conta_destino = selecionar_conta()
+    if not conta_destino:
+        return
+    if conta_destino["numero"] == conta_origem["numero"]:
+        print("Não é possível transferir para a mesma conta")
+        return
+    try:
+        valor = float(input("Valor a transferir: "))
+        if valor <= 0:
+            print("Valor inválido")
+            return
+        if valor > conta_origem["saldo"]:
+            print("Saldo insuficiente")
+            return
+        conta_origem["saldo"] -= valor
+        conta_origem["extrato"] += f"Transferência enviada: R$ {valor:.2f} -> Conta {conta_destino['numero']}\n"
+        conta_destino["saldo"] += valor
+        conta_destino["extrato"] += f"Transferência recebida: R$ {valor:.2f} <- Conta {conta_origem['numero']}\n"
+        print("Transferência realizada com sucesso")
+    except ValueError:
+        print("Valor inválido")
+
 # ----------------------------- Fluxo principal ----------------------------- #
 def main() -> None:
     while True:
@@ -144,6 +169,9 @@ def main() -> None:
         elif opcao == "e":
             conta = selecionar_conta()
             if conta: exibir_extrato(conta)
+        elif opcao == "t":
+            conta = selecionar_conta()
+            if conta: transferir(conta)
         elif opcao == "q":
             break
         else:
